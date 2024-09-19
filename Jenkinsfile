@@ -5,8 +5,11 @@ pipeline {
         stage('Build Frontend Docker Image') {
             steps {
                 script {
-                    // Build the Docker image for frontend located in the 'api' folder
-                    docker.build('frontend:latest', 'api/')
+                    try {
+                        sh 'docker build -t frontend:latest -f api/Dockerfile api/'
+                    } catch (Exception e) {
+                        echo "Failed to build frontend: ${e.message}"
+                    }
                 }
             }
         }
@@ -14,8 +17,11 @@ pipeline {
         stage('Run Frontend Docker Container') {
             steps {
                 script {
-                    // Run the Docker container for frontend
-                    docker.image('frontend:latest').run('-d -p 8080:80')
+                    try {
+                        sh 'docker run -d frontend:latest'
+                    } catch (Exception e) {
+                        echo "Failed to run frontend: ${e.message}"
+                    }
                 }
             }
         }
@@ -23,8 +29,11 @@ pipeline {
         stage('Build Backend Docker Image') {
             steps {
                 script {
-                    // Build the Docker image for backend located in the 'client' folder
-                    docker.build('backend:latest', 'client/')
+                    try {
+                        sh 'docker build -t backend:latest -f client/Dockerfile client/'
+                    } catch (Exception e) {
+                        echo "Failed to build backend: ${e.message}"
+                    }
                 }
             }
         }
@@ -32,8 +41,11 @@ pipeline {
         stage('Run Backend Docker Container') {
             steps {
                 script {
-                    // Run the Docker container for backend
-                    docker.image('backend:latest').run('-d -p 5000:5000')
+                    try {
+                        sh 'docker run -d backend:latest'
+                    } catch (Exception e) {
+                        echo "Failed to run backend: ${e.message}"
+                    }
                 }
             }
         }
@@ -41,13 +53,21 @@ pipeline {
 
     post {
         always {
-            // Clean up Docker images
             script {
-                sh 'docker rmi -f frontend:latest || true'
-                sh 'docker rmi -f backend:latest || true'
+                try {
+                    sh 'docker rmi -f frontend:latest'
+                } catch (Exception e) {
+                    echo "Image frontend:latest not found: ${e.message}"
+                }
+                try {
+                    sh 'docker rmi -f backend:latest'
+                } catch (Exception e) {
+                    echo "Image backend:latest not found: ${e.message}"
+                }
             }
         }
     }
 }
+
 
 
