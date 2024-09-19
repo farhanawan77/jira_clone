@@ -2,6 +2,13 @@ pipeline {
     agent any
 
     stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                git 'https://github.com/farhanawan77/jira_clone.git'
+            }
+        }
+
         stage('Build Frontend Docker Image') {
             steps {
                 script {
