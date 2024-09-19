@@ -1,0 +1,49 @@
+
+
+services:
+  postgres:
+    image: postgres:11.5
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: jira_development
+    ports:
+      - "5432:5432"
+    networks:
+      - net
+    volumes:
+      - ./postgres-db:/var/lib/postgresql/data
+
+  api:
+    container_name: jira-api
+    image: jira-api-prod:1.0.1
+    build:
+      context: api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - net
+    depends_on:
+      - postgres
+
+  client:
+    container_name: jira-client
+    image: jira-client-prod:1.0.1
+    build:
+      context: client
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8081"
+    networks:
+      - net
+    depends_on:
+      - postgres
+
+networks:
+  net:
+    driver: bridge
+
+volumes:
+  postgres-db:
+
